@@ -34,7 +34,7 @@ TARGET_COL = "total_cases"
 data = [ pd.read_csv(DATA_PATH+fileName, parse_dates=['week_start_date'], index_col='week_start_date',date_parser=dateparse) for fileName in FILE_NAMES]
 
 
-features = [frame[FEATURE_NAMES].shift(3).rolling(window=3,center=False).sum()[6:] for frame in data]
+features = [frame[FEATURE_NAMES].shift(1)[6:] for frame in data]
 targets = [frame[TARGET_COL][6:] for frame in data]
 
 #print(features)
@@ -43,13 +43,47 @@ targets = [frame[TARGET_COL][6:] for frame in data]
 
 
 predicted = []
-for i in range(2):    
+errors = []
+for i in range(2):  
+    
+    f = features[i][:DATA_FINISH[i]]
+    t = targets[i][:DATA_FINISH[i]]
+    
+    #anlyse features
+    X_indices = np.arange(f.shape[-1])
+    selector = SelectPercentile(f_classif, percentile=10)
+    selector.fit(f, t)
+    scores = -np.log10(selector.pvalues_)
+    scores /= scores.max()
+    plt.bar(X_indices, scores, width=.5,
+            label=r'Univariate score ($-Log(p_{value})$)', color='darkorange')
+    plt.show()
+    
+    newFeatureNames = []
+    for k,name in enumerate(FEATURE_NAMES):
+        if scores[k] > 0.2:
+            newFeatureNames.append(name)
+    
+    
+    f = features[i][:DATA_FINISH[i]][newFeatureNames]
+    t = targets[i][:DATA_FINISH[i]]
+    
+    
+    
+    X_indices = np.arange(f.shape[-1])
+    selector = SelectPercentile(f_classif, percentile=10)
+    selector.fit(f, t)
+    scores = -np.log10(selector.pvalues_)
+    scores /= scores.max()
+    plt.bar(X_indices, scores, width=.5,
+            label=r'Univariate score ($-Log(p_{value})$)', color='blue')
+    plt.show()
+    
+    
     clf = MLPRegressor(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(10,20), random_state=1)
     
-    regr = clf
-    
-    f = features[i]
-    t = targets[i]
+    regr_1 = DecisionTreeRegressor(max_depth=3)
+    regr = regr_1
     
     sample_train_features = f[:DATA_FINISH[i]][:-150]
     sample_train_targets = t[:DATA_FINISH[i]][:-150]
@@ -70,23 +104,17 @@ for i in range(2):
 #    plt.show()
 
 
-    print(mean_absolute_error(sample_test_targets,sample_test_predict_target))
+    errors.append(mean_absolute_error(sample_test_targets,sample_test_predict_target))
 
 
     #Train with all and predict
-    regr.fit(features[i][:DATA_FINISH[i]], targets[i][:DATA_FINISH[i]])
-    pred = list(map(round,regr.predict(features[i][TEST_START[i]:])))
+    regr.fit(features[i][newFeatureNames][:DATA_FINISH[i]], targets[i][:DATA_FINISH[i]])
+    pred = list(map(round,regr.predict(features[i][newFeatureNames][TEST_START[i]:])))
     predicted.append(pred)
     
     
 #    plt.figure(i)
 #    plt.clf()
 
-    X_indices = np.arange(sample_train_features.shape[-1])
-    selector = SelectPercentile(f_classif, percentile=10)
-    selector.fit(sample_train_features, sample_train_targets)
-    scores = -np.log10(selector.pvalues_)
-    scores /= scores.max()
-    plt.bar(X_indices, scores, width=.5,
-            label=r'Univariate score ($-Log(p_{value})$)', color='darkorange')
-    plt.show()
+for i in errors:
+    print(i)

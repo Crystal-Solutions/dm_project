@@ -59,10 +59,10 @@ for i in range(2):
     
     sample_test_predict_target = regr.predict(sample_test_features)
 
-#    plt.plot(sample_test_predict_target,color='blue',label='Predicted')
-#    plt.show()
-#    plt.plot(sample_test_targets,color='red',label='Original')
-#    plt.show()
+    plt.plot(sample_test_predict_target,color='blue',label='Predicted')
+    plt.show()
+    plt.plot(sample_test_targets,color='red',label='Original')
+    plt.show()
 
     print(mean_absolute_error(sample_test_targets,sample_test_predict_target))
 
