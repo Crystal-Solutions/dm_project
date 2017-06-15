@@ -39,4 +39,5 @@ preprocessData <- function(data_path, labels_path = NULL)
 preprocessData(data_path = 'dengue_features_train.csv', labels_path = 'dengue_labels_train.csv') -> trains
 sj_train <- trains[[1]]; iq_train <- as.data.frame(trains[2])
 
-cc_result <- acf(sj_train,5,plot=FALSE)
+cc_result <- acf(sj_train,5,plot=TRUE)
+

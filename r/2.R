@@ -1,5 +1,5 @@
 ## Data Loading
-pkgs <- c('tidyverse', 'corrplot', 'magrittr', 'zoo',  'RColorBrewer', 'gridExtra','MASS')
+pkgs <- c('tidyverse', 'corrplot', 'magrittr', 'zoo',  'RColorBrewer', 'gridExtra','MASS', 'randomForest')
 invisible(lapply(pkgs, require, character.only = T))
 
 setwd('J:/Raw/CS/Sem7/DM/project/data/original_data/')
@@ -12,8 +12,12 @@ preprocessData <- function(data_path, labels_path = NULL)
   df <- read.csv(data_path)
   
   # features we want
-  features = c("reanalysis_specific_humidity_g_per_kg", "reanalysis_dew_point_temp_k",
-               "station_avg_temp_c", "station_min_temp_c", "reanalysis_tdtr_k")
+  features = c("reanalysis_specific_humidity_g_per_kg", 
+               "reanalysis_dew_point_temp_k",
+               "station_avg_temp_c", 
+               "station_min_temp_c", 
+               "reanalysis_tdtr_k",
+               )
   
   # fill missing values
   df[features] %<>% na.locf(fromLast = TRUE) 
@@ -38,49 +42,40 @@ preprocessData <- function(data_path, labels_path = NULL)
 # preprocess the .csv files
 preprocessData(data_path = 'dengue_features_train.csv', labels_path = 'dengue_labels_train.csv') -> trains
 sj_train <- trains[[1]]; iq_train <- as.data.frame(trains[2])
-# summary(sj_train)
-# summary(iq_train)
-# split up the data
+
+
 sj_train_subtrain <- head(sj_train, 800)
 sj_train_subtest  <- tail(sj_train, nrow(sj_train) - 800)
 
 iq_train_subtrain <- head(iq_train, 400)
 iq_train_subtest  <- tail(iq_train, nrow(sj_train) - 400)
 
+
 # function that returns Mean Absolute Error
 mae <- function(error) return(mean(abs(error)) )
 
-get_bst_model <- function(train, test)
+get_bst_model <- function(train, test, form)
 {
-  
-  # Step 1: specify the form of the model
-  form <- "total_cases ~ 1 +
-  reanalysis_specific_humidity_g_per_kg +
-  reanalysis_dew_point_temp_k + 
-  station_avg_temp_c +
-  station_min_temp_c +
-  reanalysis_tdtr_k"
-
   grid = 10 ^(seq(-8, -3,1))
-
+  
   best_alpha = c()
   best_score = 1000
   
   # Step 2: Find the best hyper parameter, alpha
   for (i in grid)
-    {
-      model = glm.nb(formula = form,
-                     data = train,
-                     init.theta = i)
+  {
+    model = glm.nb(formula = form,
+                   data = train,
+                   init.theta = i)
     
-      results <-  predict(model, test)
-      score   <-  mae(test$total_cases - results)
-      
-      if (score < best_score) {
-          best_alpha <- i
-          best_score <- score
-          cat('\nbest score = ', best_score, '\twith alpha = ', best_alpha)
-        }
+    results <-  predict(model, test)
+    score   <-  mae(test$total_cases - results)
+    
+    if (score < best_score) {
+      best_alpha <- i
+      best_score <- score
+      cat('\nbest score = ', best_score, '\twith alpha = ', best_alpha)
+    }
   }
   
   # Step 3: refit on entire dataset
@@ -92,13 +87,31 @@ get_bst_model <- function(train, test)
   return (combined_model)
 }
 
-sj_model <- get_bst_model(sj_train_subtrain, sj_train_subtest)
-iq_model <- get_bst_model(iq_train_subtrain, iq_train_subtest)
+getRandomForest <- function(train, test, form){
+  r <- randomForest(Y~.,data=train, maxnodes=10)
+  return (r)
+}
+
+
+# Step 1: specify the form of the model
+form <- "total_cases ~ 1 +
+  reanalysis_specific_humidity_g_per_kg +
+  reanalysis_dew_point_temp_k + 
+  station_avg_temp_c +
+  station_min_temp_c +
+  reanalysis_tdtr_k"
+
+
+sj_model <- get_bst_model(sj_train_subtrain, sj_train_subtest,form)
+iq_model <- get_bst_model(iq_train_subtrain, iq_train_subtest,form)
 
 
 # plot sj
 sj_train$fitted = predict(sj_model, sj_train, type = 'response')
 sj_train %>% 
+  subset(year>1993) %>% 
+  subset(weekofyear>30) %>% 
+  subset(year<1995) %>% 
   mutate(index = as.numeric(row.names(.))) %>%
   ggplot(aes(x = index)) + ggtitle("San Jose") +
   geom_line(aes(y = total_cases, colour = "total_cases")) + 
