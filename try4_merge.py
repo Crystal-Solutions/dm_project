@@ -29,7 +29,6 @@ COL_NAMES = ["city", "TimeIndex", "year", "weekofyear", "week_start_date", "ndvi
 #FEATURE_NAMES = [ "ndvi_ne", "ndvi_nw", "ndvi_se", "ndvi_sw", "precipitation_amt_mm", "reanalysis_air_temp_k", "reanalysis_avg_temp_k", "reanalysis_dew_point_temp_k", "reanalysis_max_air_temp_k", "reanalysis_min_air_temp_k", "reanalysis_precip_amt_kg_per_m2", "reanalysis_relative_humidity_percent", "reanalysis_sat_precip_amt_mm", "reanalysis_specific_humidity_g_per_kg", "reanalysis_tdtr_k", "station_avg_temp_c", "station_diur_temp_rng_c", "station_max_temp_c", "station_min_temp_c", "station_precip_mm"]
 FEATURE_NAMES = [ "precipitation_amt_mm", "reanalysis_air_temp_k", "reanalysis_avg_temp_k", "reanalysis_dew_point_temp_k", "reanalysis_max_air_temp_k", "reanalysis_min_air_temp_k", "reanalysis_precip_amt_kg_per_m2", "reanalysis_relative_humidity_percent", "reanalysis_sat_precip_amt_mm", "reanalysis_specific_humidity_g_per_kg", "reanalysis_tdtr_k", "station_avg_temp_c", "station_diur_temp_rng_c", "station_max_temp_c", "station_min_temp_c", "station_precip_mm"]
 TARGET_COL = "total_cases"
-
 #Load Data
 data = [ pd.read_csv(DATA_PATH+fileName, parse_dates=['week_start_date'], index_col='week_start_date',date_parser=dateparse) for fileName in FILE_NAMES]
 
@@ -48,8 +47,17 @@ for i in range(2):
     
     regr = clf
     
-    f = features[i]
+    fo = features[i]
     t = targets[i]
+    
+    f = []
+    for i,row in enumerate(fo):
+        newRow = row[:]
+        if(i>0):
+            np.concatenate((newRow, fo[i-1]))
+        else:
+            np.concatenate((newRow,newRow))
+        break
     
     sample_train_features = f[:DATA_FINISH[i]][:-150]
     sample_train_targets = t[:DATA_FINISH[i]][:-150]
