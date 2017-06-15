@@ -14,6 +14,7 @@ from datetime import datetime
 from sklearn.metrics import mean_absolute_error
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.neural_network import MLPRegressor
+from sklearn.ensemble import RandomForestRegressor
 
 
 dateparse = lambda dates: pd.datetime.strptime(dates, '%Y-%m-%d')
@@ -25,6 +26,12 @@ DATA_FINISH = ['2008-04-22','2010-06-25']
 TEST_START = ['2008-04-29','2010-07-02']
 COL_NAMES = ["city", "TimeIndex", "year", "weekofyear", "week_start_date", "ndvi_ne", "ndvi_nw", "ndvi_se", "ndvi_sw", "precipitation_amt_mm", "reanalysis_air_temp_k", "reanalysis_avg_temp_k", "reanalysis_dew_point_temp_k", "reanalysis_max_air_temp_k", "reanalysis_min_air_temp_k", "reanalysis_precip_amt_kg_per_m2", "reanalysis_relative_humidity_percent", "reanalysis_sat_precip_amt_mm", "reanalysis_specific_humidity_g_per_kg", "reanalysis_tdtr_k", "station_avg_temp_c", "station_diur_temp_rng_c", "station_max_temp_c", "station_min_temp_c", "station_precip_mm", "total_cases"]
 FEATURE_NAMES = ["city", "ndvi_ne", "ndvi_nw", "ndvi_se", "ndvi_sw", "precipitation_amt_mm", "reanalysis_air_temp_k", "reanalysis_avg_temp_k", "reanalysis_dew_point_temp_k", "reanalysis_max_air_temp_k", "reanalysis_min_air_temp_k", "reanalysis_precip_amt_kg_per_m2", "reanalysis_relative_humidity_percent", "reanalysis_sat_precip_amt_mm", "reanalysis_specific_humidity_g_per_kg", "reanalysis_tdtr_k", "station_avg_temp_c", "station_diur_temp_rng_c", "station_max_temp_c", "station_min_temp_c", "station_precip_mm"]
+
+BM_FEATURE_NAMES =  ['reanalysis_specific_humidity_g_per_kg', 
+                 'reanalysis_dew_point_temp_k', 
+                 'station_avg_temp_c', 
+                 'station_min_temp_c']
+#FEATURE_NAMES = BM_FEATURE_NAMES
 TARGET_COL = "total_cases"
 
 #Load Data
@@ -42,10 +49,9 @@ targets = [frame[TARGET_COL][5:] for frame in data]
 predicted = []
 for i in range(2):    
     
-    regr = DecisionTreeRegressor(max_depth=3)
+#    regr = DecisionTreeRegressor(max_depth=4)
 
-     
-    
+    regr = RandomForestRegressor(max_depth=3,min_samples_split =10,n_estimators=200)    
     f = features[i]
     t = targets[i]
     
