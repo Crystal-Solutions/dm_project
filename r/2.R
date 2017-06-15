@@ -2,7 +2,7 @@
 pkgs <- c('tidyverse', 'corrplot', 'magrittr', 'zoo',  'RColorBrewer', 'gridExtra','MASS', 'randomForest')
 invisible(lapply(pkgs, require, character.only = T))
 
-setwd('J:/Raw/CS/Sem7/DM/project/data/original_data/')
+setwd('J:/Raw/CS/Sem7/DM/project/data/')
 #Train
 
 
@@ -15,8 +15,7 @@ preprocessData <- function(data_path, labels_path = NULL)
   features = c("reanalysis_specific_humidity_g_per_kg", 
                "reanalysis_dew_point_temp_k",
                "station_avg_temp_c", 
-               "station_min_temp_c", 
-               "reanalysis_tdtr_k",
+               "station_min_temp_c"
                )
   
   # fill missing values
@@ -40,7 +39,7 @@ preprocessData <- function(data_path, labels_path = NULL)
 }
 
 # preprocess the .csv files
-preprocessData(data_path = 'dengue_features_train.csv', labels_path = 'dengue_labels_train.csv') -> trains
+preprocessData(data_path = 'dengue_features_train.csv', labels_path = 'part_removed/dengue_labels_train_filled_94_anom.csv') -> trains
 sj_train <- trains[[1]]; iq_train <- as.data.frame(trains[2])
 
 
@@ -98,8 +97,7 @@ form <- "total_cases ~ 1 +
   reanalysis_specific_humidity_g_per_kg +
   reanalysis_dew_point_temp_k + 
   station_avg_temp_c +
-  station_min_temp_c +
-  reanalysis_tdtr_k"
+  station_min_temp_c 
 
 
 sj_model <- get_bst_model(sj_train_subtrain, sj_train_subtest,form)
@@ -161,9 +159,11 @@ sj_train %>%
 # plot iq
 iq_train$fitted = predict(iq_model, iq_train, type = 'response')
 iq_train %>% 
-  subset(year > 2003) %>% 
-  subset(year < 2005) %>% 
+  subset(year > 1990) %>% 
+  subset(year < 2010) %>% 
   mutate(index = as.numeric(row.names(.))) %>%
   ggplot(aes(x = index)) + ggtitle("Iquitos") + 
   geom_line(aes(y = total_cases, colour = "total_cases")) + 
   geom_line(aes(y = fitted, colour = "fitted"))
+
+
