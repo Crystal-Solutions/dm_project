@@ -37,9 +37,9 @@ for d in data:
      d.fillna(method='ffill', inplace=True)
 
 #Multiple rows to a single line
-base_shift = 2
-window_size = 20
-features = [frame[FEATURE_NAMES].shift(base_shift)[base_shift:] for frame in data]
+base_shift = 0
+window_size = 1
+features = [frame[FEATURE_NAMES].rolling(window=1,center=False).sum()[base_shift:] for frame in data]
 #Merge features form weeks to make many features
 new_features = []
 for f in features:
@@ -63,11 +63,11 @@ for i in range(2):
     
     rng = np.random.RandomState(1)
     regr_1 = DecisionTreeRegressor(max_depth=3)
-    regr_2 = AdaBoostRegressor(DecisionTreeRegressor(max_depth=4),
+    regr_2 = AdaBoostRegressor(DecisionTreeRegressor(max_depth=3),
                               n_estimators=300, random_state=rng)
-    clf = MLPRegressor(solver='lbfgs', tol=1e-5, alpha=1e-5, hidden_layer_sizes=(100,20), random_state=1)
+    clf = MLPRegressor(solver='lbfgs', tol=1e-20, max_iter=30000, alpha=1e-5, hidden_layer_sizes=(20,4), random_state=1)
     
-    regr = regr_1
+    regr = clf
     
     f = new_features[i]
     t = targets[i]
@@ -86,7 +86,7 @@ for i in range(2):
     
     effective_indexes = []
     for j in range(len(scores)):
-        if scores[j]>0.9:
+        if scores[j]>0.7:
             effective_indexes.append(j)
     
     f_after_removing_features = []
@@ -98,12 +98,13 @@ for i in range(2):
     
     f = f_after_removing_features
     
-    print(effective_indexes)
+    for e_i in effective_indexes:
+        print(e_i,FEATURE_NAMES[e_i])
     
-    sample_train_features = f[:data_finish_indexes[i]+1][:-200]
-    sample_train_targets = t[:DATA_FINISH[i]][:-200]
-    sample_test_features = f[:data_finish_indexes[i]+1][-200:]
-    sample_test_targets = t[:DATA_FINISH[i]][-200:]
+    sample_train_features = f[:data_finish_indexes[i]+1][:-150]
+    sample_train_targets = t[:DATA_FINISH[i]][:-150]
+    sample_test_features = f[:data_finish_indexes[i]+1][-150:]
+    sample_test_targets = t[:DATA_FINISH[i]][-150:]
     
     #fit a sample program
     regr.fit(sample_train_features, sample_train_targets)
