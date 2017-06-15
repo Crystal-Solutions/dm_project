@@ -155,8 +155,8 @@ def preprocess_data(data_path, labels_path=None):
     
     return sj, iq
 
-sj_train, iq_train = preprocess_data('./data/dengue_features_train_removed_94_anom.csv',
-                                    labels_path="./data/dengue_labels_train_removed_94_anom.csv")
+sj_train, iq_train = preprocess_data('./data/part_removed/dengue_features_train.csv',
+                                    labels_path="./data/part_removed/dengue_labels_train_filled_94_anom.csv")
 #print(sj_train.describe())
 
 sj_train_subtrain = sj_train.head(800)
@@ -172,18 +172,15 @@ from sklearn.decomposition import PCA
 def get_best_model_sj(train, test):
     # Step 1: specify the form of the model
                                
-
+#
 #    #CHANGE HERE ---- SJ FEATURES   
-#    model_formula = "total_cases ~ 1 + " \
-#                    "A + " \
-#                    "B + " \
-#                    "C + " \
-#                    "D + " \
-#                    "E + " \
-#                    "F"
+#    letters = 'ABCDEFGHIJKLMNOP'
+#    model_formula = "total_cases ~ 1  " 
+#    for i in range(15):
+#        model_formula += '+ '+letters[i]
                     
                  
-    #CHANGE HERE ---- SJ FEATURES   
+#    #CHANGE HERE ---- SJ FEATURES   
     model_formula = "total_cases ~ 1 + " \
                     "reanalysis_specific_humidity_g_per_kg + " \
                     "reanalysis_dew_point_temp_k + " \
@@ -279,15 +276,16 @@ def get_best_model_iq(train, test):
     return fitted_model
 
 
-#PCA
-#pca = PCA(n_components=6)   
+##PCA
+#pca = PCA(n_components=15)   
+#PCA_COLS = list('ABCDEFGHIJKLMNOP'[:15])
 #sj_train_subtrain_for_pca = sj_train_subtrain.copy()
 #sj_train_subtrain_for_pca = sj_train_subtrain_for_pca.drop('total_cases', 1)
 #pca.fit(sj_train_subtrain_for_pca)
-
-#principal component analysis
-#sj_train_subtrain = pd.concat([pd.DataFrame(pca.transform(sj_train_subtrain_for_pca),columns=list('ABCDEF'),index=sj_train_subtrain_for_pca.index),sj_train_subtrain],axis=1)
-#sj_train_subtest = pd.concat([pd.DataFrame(pca.transform(sj_train_subtest.drop('total_cases', 1)),columns=list('ABCDEF'),index=sj_train_subtest.index),sj_train_subtest],axis=1)
+#
+##principal component analysis
+#sj_train_subtrain = pd.concat([pd.DataFrame(pca.transform(sj_train_subtrain_for_pca),columns=PCA_COLS,index=sj_train_subtrain_for_pca.index),sj_train_subtrain],axis=1)
+#sj_train_subtest = pd.concat([pd.DataFrame(pca.transform(sj_train_subtest.drop('total_cases', 1)),columns=PCA_COLS,index=sj_train_subtest.index),sj_train_subtest],axis=1)
 
 #sj_train_subtrain = sj_train_subtrain.loc[:1993]
 #idx = pd.IndexSlice
@@ -298,7 +296,7 @@ sj_best_model = get_best_model_sj(sj_train_subtrain, sj_train_subtest)
 iq_best_model = get_best_model_iq(iq_train_subtrain, iq_train_subtest)
 
 sj_test, iq_test = preprocess_data('./data/dengue_features_test.csv')
-#sj_test = pd.concat([pd.DataFrame(pca.transform(sj_test),columns=list('ABCDEF'),index=sj_test.index),sj_test],axis=1)
+#sj_test = pd.concat([pd.DataFrame(pca.transform(sj_test),columns=PCA_COLS,index=sj_test.index),sj_test],axis=1)
 
 sj_predictions = sj_best_model.predict(sj_test).astype(int)
 iq_predictions = iq_best_model.predict(iq_test).astype(int)
