@@ -145,8 +145,8 @@ write.csv(predictions, 'submissions/predictions.csv', row.names = FALSE)
 
 #Plot
 sj_train %>% 
-  subset(year > 2001) %>% 
-  subset(year < 2003) %>% 
+ # subset(year > 2001) %>% 
+#  subset(year < 2003) %>% 
   subset(weekofyear >10) %>%
   mutate(index = as.numeric(row.names(.))) %>%
   ggplot(aes(x = index)) + ggtitle("San Jose") +
@@ -156,3 +156,14 @@ sj_train %>%
 # geom_line(aes(y = reanalysis_dew_point_temp_k, colour = "fitted"))+ 
 # geom_line(aes(y = station_avg_temp_c, colour = "fitted"))+ 
 # geom_line(aes(y = station_min_temp_c, colour = "fitted"))
+
+
+# plot iq
+iq_train$fitted = predict(iq_model, iq_train, type = 'response')
+iq_train %>% 
+  subset(year > 2003) %>% 
+  subset(year < 2005) %>% 
+  mutate(index = as.numeric(row.names(.))) %>%
+  ggplot(aes(x = index)) + ggtitle("Iquitos") + 
+  geom_line(aes(y = total_cases, colour = "total_cases")) + 
+  geom_line(aes(y = fitted, colour = "fitted"))
