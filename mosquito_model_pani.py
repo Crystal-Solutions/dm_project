@@ -47,6 +47,8 @@ def preprocess_data(data_path, labels_path=None):
                    'reanalysis_dew_point_temp_k',
                    'station_avg_temp_c',
                    'station_min_temp_c',
+                   'precipitation_amt_mm_shifted',
+                   'precipitation_amt_mm_shifted2',
                    'reanalysis_min_air_temp_k']
 
     df_sj = df[features_sj]
@@ -71,7 +73,9 @@ def preprocess_data(data_path, labels_path=None):
 
     return sj, iq
 
-sj_train, iq_train = preprocess_data('data-processed/my_train.csv',labels_path="data-processed/dengue_labels_train.csv")
+#sj_train, iq_train = preprocess_data('data-processed_pani/dengue_features_train_removed_94_anom.csv',labels_path="data-processed_pani/dengue_labels_train_removed_94_anom.csv")
+#sj_train, iq_train = preprocess_data('data-processed_pani/dengue_features_train.csv',labels_path="data-processed_pani/dengue_labels_train.csv")
+sj_train, iq_train = preprocess_data('data-processed_pani/dengue_features_train.csv',labels_path="data-processed_pani/dengue_labels_train_filled_94_anom.csv")
 
 #print(sj_train.describe())
 
@@ -84,21 +88,6 @@ iq_train_subtest = iq_train.tail(iq_train.shape[0] - 400)
 sj_correlations = sj_train_subtrain.corr()
 iq_correlations = iq_train_subtrain.corr()
 
-# San Juan
-'''(sj_correlations
-     .total_cases
-     .drop('total_cases') # don't compare with myself
-     .sort_values(ascending=False)
-     .plot
-     .barh())'''
-
-# Iquitos
-'''(iq_correlations
-     .total_cases
-     .drop('total_cases') # don't compare with myself
-     .sort_values(ascending=False)
-     .plot
-     .barh())'''
 
 def get_best_model(train, test, model_formula ):
     # Step 1: specify the form of the model
@@ -172,17 +161,17 @@ iq_train['fitted'] = iq_best_model.fittedvalues
 iq_train.fitted.plot(ax=axes[1], label="Predictions")
 iq_train.total_cases.plot(ax=axes[1], label="Actual")
 
-#plt.suptitle("Dengue Predicted Cases vs. Actual Cases")
-#plt.legend()
-#plt.show()
+plt.suptitle("Dengue Predicted Cases vs. Actual Cases")
+plt.legend()
+plt.show()
 
-sj_test, iq_test = preprocess_data('data-processed/dengue_features_test.csv')
+sj_test, iq_test = preprocess_data('data-processed_pani/dengue_features_test.csv')
 
 sj_predictions = sj_best_model.predict(sj_test).astype(int)
 iq_predictions = iq_best_model.predict(iq_test).astype(int)
 
-submission = pd.read_csv("data-processed/submission_format.csv",
+submission = pd.read_csv("data-processed_pani/submission_format.csv",
                          index_col=[0, 1, 2])
 
 submission.total_cases = np.concatenate([sj_predictions, iq_predictions])
-submission.to_csv("data-processed/test4.csv")
+submission.to_csv("data-processed_pani/test6.csv")
