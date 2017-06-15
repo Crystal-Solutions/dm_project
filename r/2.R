@@ -110,7 +110,7 @@ iq_model <- get_bst_model(iq_train_subtrain, iq_train_subtest,form)
 sj_train$fitted = predict(sj_model, sj_train, type = 'response')
 sj_train %>% 
   subset(year>1993) %>% 
-  subset(weekofyear>30) %>% 
+  subset(weekofyear>1993) %>% 
   subset(year<1995) %>% 
   mutate(index = as.numeric(row.names(.))) %>%
   ggplot(aes(x = index)) + ggtitle("San Jose") +
@@ -140,3 +140,19 @@ inner_join(submissions, rbind(sj_test,iq_test)) %>%
 
 predictions$total_cases %<>% round()
 write.csv(predictions, 'submissions/predictions.csv', row.names = FALSE)
+
+
+
+#Plot
+sj_train %>% 
+  subset(year > 2001) %>% 
+  subset(year < 2003) %>% 
+  subset(weekofyear >10) %>%
+  mutate(index = as.numeric(row.names(.))) %>%
+  ggplot(aes(x = index)) + ggtitle("San Jose") +
+  geom_line(aes(y = total_cases, colour = "total_cases")) +
+  geom_line(aes(y = fitted, colour = "fitted"))
+#geom_line(aes(y = reanalysis_specific_humidity_g_per_kg, colour = "fitted")) 
+# geom_line(aes(y = reanalysis_dew_point_temp_k, colour = "fitted"))+ 
+# geom_line(aes(y = station_avg_temp_c, colour = "fitted"))+ 
+# geom_line(aes(y = station_min_temp_c, colour = "fitted"))
