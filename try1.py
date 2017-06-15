@@ -17,16 +17,18 @@ from sklearn.ensemble import AdaBoostRegressor
 dfTrain = pd.read_csv(DATA_PATH+'dengue_features_labels_train.csv')
 dfTest = pd.read_csv(DATA_PATH+'dengue_features_test.csv')
 
+results = []
+
 #Prepare Column names
 colNames = dfTrain.columns.values
 featureColNames = np.delete(colNames,np.argwhere(colNames=='total_cases' ))
 featureColNames = np.delete(featureColNames,np.argwhere(featureColNames=='week_start_date' ))
-print(colNames)
+print(featureColNames)
 [ print(i,end="\t") for i in featureColNames]
 
-#Make X,Y for traing
+#Make X,Y for training
 X = dfTrain.loc[:,featureColNames].values
-y = dfTrain['total_cases'].values        
+y = dfTrain['total_cases'].values
 XTest = dfTest.loc[:,featureColNames].values    
 
 #Make regression
@@ -39,9 +41,14 @@ regr_2 = AdaBoostRegressor(DecisionTreeRegressor(max_depth=4),
 regr_1.fit(X, y)
 regr_2.fit(X, y)
 
-
-
-                  
-
-y_1 = list(map(round, regr_1.predict(XTest)))
+y_1 = list(map(round,regr_1.predict(XTest)))
 y_2 = list(map(round,regr_2.predict(XTest)))
+
+#results.append((y_1, y_2))
+results.append(y_2)
+
+print("\n")
+
+for i in results[0]:
+    print(i)
+    #print("\n")
