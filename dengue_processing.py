@@ -55,3 +55,9 @@ def shift(df,n):
     df = df.shift(n)
     df.fillna(method='bfill', inplace=True)
     return df
+
+
+def rolingMean(df,n):
+    df = df.rolling(window=1,center=n).mean()
+    df.fillna(method='bfill', inplace=True)
+    return df
