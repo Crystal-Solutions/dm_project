@@ -98,15 +98,16 @@ def preprocess_data(data_path, labels_path=None):
 #    'station_max_temp_c',
 #    reanalysis_sat_precip_amt_mm
 #    precipitation_amt_mm
+# f regression/ 
 
     #ADD SHIFTED FEATURES HERE
     df['reanalysis_relative_humidity_percent_2'] = dp.shift(df['reanalysis_relative_humidity_percent'],8)
     df['reanalysis_relative_humidity_percent_3'] = dp.shift(df['reanalysis_relative_humidity_percent'],3)
     df['reanalysis_precip_amt_kg_per_m2_2'] = dp.shift(df['reanalysis_precip_amt_kg_per_m2'],8)
     df['reanalysis_precip_amt_kg_per_m2_3'] = dp.shift(df['reanalysis_precip_amt_kg_per_m2'],6)
-    df['reanalysis_specific_humidity_g_per_kg_2'] = dp.shift(df['reanalysis_specific_humidity_g_per_kg'],2)
-    df['reanalysis_specific_humidity_g_per_kg_3'] = dp.shift(df['reanalysis_specific_humidity_g_per_kg'],6)#11
-    df['reanalysis_dew_point_temp_k_2'] = dp.shift(df['reanalysis_dew_point_temp_k'],11)#2,9
+    df['reanalysis_specific_humidity_g_per_kg_2'] = dp.shift(df['reanalysis_specific_humidity_g_per_kg'],11)
+    df['reanalysis_specific_humidity_g_per_kg_3'] = dp.shift(df['reanalysis_specific_humidity_g_per_kg'],6)
+    df['reanalysis_dew_point_temp_k_2'] = dp.shift(df['reanalysis_dew_point_temp_k'],11)
     df['reanalysis_dew_point_temp_k_3'] = dp.shift(df['reanalysis_dew_point_temp_k'],5)
     df['reanalysis_dew_point_temp_k_4'] = dp.shift(df['reanalysis_dew_point_temp_k'],6)
     
