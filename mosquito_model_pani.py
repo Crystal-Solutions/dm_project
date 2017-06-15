@@ -74,7 +74,8 @@ def preprocess_data(data_path, labels_path=None):
     return sj, iq
 
 #sj_train, iq_train = preprocess_data('data-processed_pani/dengue_features_train_removed_94_anom.csv',labels_path="data-processed_pani/dengue_labels_train_removed_94_anom.csv")
-sj_train, iq_train = preprocess_data('data-processed_pani/my_train.csv',labels_path="data-processed_pani/dengue_labels_train.csv")
+#sj_train, iq_train = preprocess_data('data-processed_pani/dengue_features_train.csv',labels_path="data-processed_pani/dengue_labels_train.csv")
+sj_train, iq_train = preprocess_data('data-processed_pani/dengue_features_train.csv',labels_path="data-processed_pani/dengue_labels_train_filled_94_anom.csv")
 
 #print(sj_train.describe())
 
@@ -173,4 +174,4 @@ submission = pd.read_csv("data-processed_pani/submission_format.csv",
                          index_col=[0, 1, 2])
 
 submission.total_cases = np.concatenate([sj_predictions, iq_predictions])
-submission.to_csv("data-processed_pani/test5.csv")
+submission.to_csv("data-processed_pani/test6.csv")
