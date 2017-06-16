@@ -26,9 +26,9 @@ from warnings import filterwarnings
 filterwarnings('ignore')
 
 # load the provided data
-train_features = pd.read_csv('./data/dengue_features_train.csv', index_col=[0,1,2])
+train_features = pd.read_csv('./data/dengue_features_train_removed_94_anom.csv', index_col=[0,1,2])
 
-train_labels = pd.read_csv('./data/dengue_labels_train.csv', index_col=[0,1,2])
+train_labels = pd.read_csv('./data/dengue_labels_train_removed_94_anom.csv', index_col=[0,1,2])
 
 # Seperate data for San Juan
 sj_train_features = train_features.loc['sj']
@@ -94,11 +94,12 @@ def preprocess_data(data_path, labels_path=None):
 #        labels = pd.read_csv(labels_path, index_col=[0, 1, 2])
 #        df = df.join(labels)
 
-#    'reanalysis_air_temp_k',
-#    'station_max_temp_c',
+
 #    reanalysis_sat_precip_amt_mm
 #    precipitation_amt_mm
 # f regression/ 
+# pca
+#fillna seperate for features
 
     #ADD SHIFTED FEATURES HERE
     df['reanalysis_relative_humidity_percent_2'] = dp.shift(df['reanalysis_relative_humidity_percent'],8)
@@ -110,6 +111,20 @@ def preprocess_data(data_path, labels_path=None):
     df['reanalysis_dew_point_temp_k_2'] = dp.shift(df['reanalysis_dew_point_temp_k'],11)
     df['reanalysis_dew_point_temp_k_3'] = dp.shift(df['reanalysis_dew_point_temp_k'],5)
     df['reanalysis_dew_point_temp_k_4'] = dp.shift(df['reanalysis_dew_point_temp_k'],6)
+    df['reanalysis_air_temp_k_2'] = dp.shift(df['reanalysis_air_temp_k'],1)
+    df['reanalysis_air_temp_k_4'] = dp.shift(df['reanalysis_air_temp_k'],5)
+    df['reanalysis_air_temp_k_5'] = dp.shift(df['reanalysis_air_temp_k'],6)
+    df['reanalysis_air_temp_k_6'] = dp.shift(df['reanalysis_air_temp_k'],7)
+    df['reanalysis_air_temp_k_7'] = dp.shift(df['reanalysis_air_temp_k'],11)
+    df['reanalysis_air_temp_k_8'] = dp.shift(df['reanalysis_air_temp_k'],12)
+    df['station_max_temp_c_2'] = dp.shift(df['station_max_temp_c'],12)
+    df['station_max_temp_c_3'] = dp.shift(df['station_max_temp_c'],3)
+    df['station_max_temp_c_4'] = dp.shift(df['station_max_temp_c'],1)
+    df['station_max_temp_c_5'] = dp.shift(df['station_max_temp_c'],10)#10,4
+    df['station_max_temp_c_6'] = dp.shift(df['station_max_temp_c'],4)
+    df['reanalysis_sat_precip_amt_mm_2'] = dp.shift(df['reanalysis_sat_precip_amt_mm'],11)
+    df['precipitation_amt_mm_2'] = dp.shift(df['precipitation_amt_mm'],10)
+    df['precipitation_amt_mm_3'] = dp.shift(df['precipitation_amt_mm'],1)
     
     #CHANGE HERE ---- SJ FEATURES
     features_sj = ['reanalysis_specific_humidity_g_per_kg', 
@@ -126,7 +141,21 @@ def preprocess_data(data_path, labels_path=None):
              'reanalysis_specific_humidity_g_per_kg_3',
              'reanalysis_dew_point_temp_k_2',
              'reanalysis_dew_point_temp_k_3',
-             'reanalysis_dew_point_temp_k_4']
+             'reanalysis_dew_point_temp_k_4',
+             'reanalysis_air_temp_k_2',
+             'reanalysis_air_temp_k_4',
+             'reanalysis_air_temp_k_5',
+             'reanalysis_air_temp_k_6',
+             'reanalysis_air_temp_k_7',
+             'reanalysis_air_temp_k_8',
+             'station_max_temp_c_2',
+             'station_max_temp_c_3',
+             'station_max_temp_c_4',
+             'station_max_temp_c_5',
+             'station_max_temp_c_6',
+             'reanalysis_sat_precip_amt_mm_2',
+             'precipitation_amt_mm_2',
+             'precipitation_amt_mm_3']
     
     #CHANGE HERE ---- IQ FEATURES
     features_iq = ['reanalysis_specific_humidity_g_per_kg', 
@@ -156,8 +185,8 @@ def preprocess_data(data_path, labels_path=None):
     
     return sj, iq
 
-sj_train, iq_train = preprocess_data('./data/dengue_features_train.csv',
-                                    labels_path="./data/dengue_labels_train.csv")
+sj_train, iq_train = preprocess_data('./data/dengue_features_train_removed_94_anom.csv',
+                                    labels_path="./data/dengue_labels_train_removed_94_anom.csv")
 #print(sj_train.describe())
 
 sj_train_subtrain = sj_train.head(800)
@@ -188,8 +217,21 @@ def get_best_model_sj(train, test):
                     "reanalysis_specific_humidity_g_per_kg_3 + " \
                     "reanalysis_dew_point_temp_k_2 + " \
                     "reanalysis_dew_point_temp_k_3 + " \
-                    "reanalysis_dew_point_temp_k_4"
-                    
+                    "reanalysis_dew_point_temp_k_4 + " \
+                    "reanalysis_air_temp_k_2 + " \
+                    "reanalysis_air_temp_k_4 + " \
+                    "reanalysis_air_temp_k_5 + " \
+                    "reanalysis_air_temp_k_6 + " \
+                    "reanalysis_air_temp_k_7 + " \
+                    "reanalysis_air_temp_k_8 + " \
+                    "station_max_temp_c_3 + " \
+                    "station_max_temp_c_4 + " \
+                    "station_max_temp_c_5 + " \
+                    "station_max_temp_c_6 + " \
+                    "station_max_temp_c_2 + " \
+                    "reanalysis_sat_precip_amt_mm_2 + " \
+                    "precipitation_amt_mm_2 + " \
+                    "precipitation_amt_mm_3"
                     
                     
     grid = 10 ** np.arange(-8, -3, dtype=np.float64)
