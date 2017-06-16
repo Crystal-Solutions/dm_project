@@ -65,3 +65,5 @@ for i,df in enumerate(dfs):
     y_1 = list(map(round, regr_1.predict(newXTest)))
     y_2 = list(map(round,regr_2.predict(newXTest)))
     results.append((y_1, y_2))
+    print('\n')
+    print(results)
